@@ -1,0 +1,9 @@
+[Plymouth Theme]
+Name=Nula Linux
+Description=Minimal
+
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/nula-boot
+ScriptFile=/usr/share/plymouth/themes/nula-boot/nula-boot.script

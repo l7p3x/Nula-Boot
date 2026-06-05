@@ -1,0 +1,269 @@
+# Original theme:
+# Copyright (C) Markospoko (taomarku at gmail.com)
+
+# Modifications:
+# Copyright (C) 2026 l7p3x
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Nula — Plymouth boot theme
+# nula-boot.script
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Helpers: max screen dimensions ─────────────────────────────────────────────
+
+Window.GetMaxWidth = fun () {
+  i = 0; w = 0;
+  while (Window.GetWidth(i)) {
+    w = Math.Max(w, Window.GetWidth(i));
+    i++;
+  }
+  return w;
+};
+
+Window.GetMaxHeight = fun () {
+  i = 0; h = 0;
+  while (Window.GetHeight(i)) {
+    h = Math.Max(h, Window.GetHeight(i));
+    i++;
+  }
+  return h;
+};
+
+maxW = Window.GetMaxWidth();
+maxH = Window.GetMaxHeight();
+
+# ── Resolution → asset directory ───────────────────────────────────────────────
+# Resolved once at the top. The original duplicated this block 3×.
+
+scaleFactor = maxW / 3840;
+
+if (maxW == 3840) {
+  scaleFactor = 1; dim = "3840x2160";
+} else if (maxW == 1920) {
+  scaleFactor = 1; dim = "1920x1080";
+} else if (maxW == 1600) {
+  scaleFactor = 1; dim = "1600x900";
+} else if (maxW == 1366) {
+  scaleFactor = 1; dim = "1366x768";
+} else if (maxW == 1280) {
+  scaleFactor = 1; dim = "1280x720";
+} else if (maxW == 1024) {
+  scaleFactor = 1; dim = "1024x576";
+} else {
+  dim = "3840x2160"; # non-standard: use 4K assets, scale proportionally
+}
+
+# switch-off-logo tops out at 1920×1080 (no 3840×2160 variant in tree)
+if (maxW == 3840 || maxW == 1920) {
+  sodim = "1920x1080";
+} else if (maxW == 1600) {
+  sodim = "1600x900";
+} else if (maxW == 1366) {
+  sodim = "1366x768";
+} else if (maxW == 1280) {
+  sodim = "1280x720";
+} else {
+  sodim = "1024x576";
+}
+
+# ── Background: solid Nula dark palette (#000000) ──────────────────────────────
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+# ── Mode-specific asset loading ─────────────────────────────────────────────────
+
+if (Plymouth.GetMode() == "boot" || Plymouth.GetMode() == "shutdown") {
+  logo.original_image = ImageNew("gfx/logo/" + dim + "/logo.png");
+}
+
+if (Plymouth.GetMode() == "shutdown") {
+  # switch-off-logo replaces the background-toff images from the original theme
+  switchoff.original_image = ImageNew("gfx/switch-off-logo/" + sodim + "/switch-off-button.png");
+  switchoff.image  = switchoff.original_image.Scale(maxW, maxH);
+  switchoff.sprite = SpriteNew();
+  switchoff.sprite.SetImage(switchoff.image);
+  switchoff.sprite.SetPosition(0, 0, -10);
+}
+
+# ── Logo: centered, slightly above vertical mid-point ──────────────────────────
+
+if (Plymouth.GetMode() == "boot" || Plymouth.GetMode() == "shutdown") {
+  newLogoW = scaleFactor * logo.original_image.GetWidth();
+  newLogoH = scaleFactor * logo.original_image.GetHeight();
+  logo.image  = logo.original_image.Scale(newLogoW, newLogoH);
+  logo.sprite = SpriteNew();
+  logo.sprite.SetImage(logo.image);
+  logo.sprite.SetX((maxW - newLogoW) / 2);
+  logo.sprite.SetY((11 * maxH / 25) - (newLogoH / 2));
+}
+
+# ── Loading circle: 4 frames ───────────────────────────────────────────────────
+
+for (frame = 1; frame <= 4; frame++) {
+  if (frame < 10)
+    num = "0" + frame;
+  else
+    num = "" + frame;
+
+  loading_circle.image[frame - 1] = ImageNew("gfx/loading_circle/" + dim + "/loading_circle 00" + num + ".png");
+  sw = scaleFactor * loading_circle.image[frame - 1].GetWidth();
+  sh = scaleFactor * loading_circle.image[frame - 1].GetHeight();
+  loading_circle.image[frame - 1] = loading_circle.image[frame - 1].Scale(sw, sh);
+}
+
+loading_circle.sprite = SpriteNew();
+
+# ── Refresh callback ───────────────────────────────────────────────────────────
+
+frameNum = 1;
+
+fun refresh_callback () {
+  # No animation in password mode or during shutdown
+  if (status != "normal") {
+    return;
+  }
+  if (Plymouth.GetMode() == "shutdown") {
+    return;
+  }
+
+  loading_circle.sprite.SetImage(loading_circle.image[Math.Int((frameNum++ - 1) / 12) % 4]);
+  cw = loading_circle.image[0].GetWidth();
+  ch = loading_circle.image[0].GetHeight();
+  loading_circle.sprite.SetX((maxW - cw) / 2);
+  loading_circle.sprite.SetY((10 * maxH / 16) - (ch / 2));
+}
+
+if (Plymouth.GetMode() != "suspend" && Plymouth.GetMode() != "resume") {
+  Plymouth.SetRefreshFunction(refresh_callback);
+}
+
+# ── Progress callback ──────────────────────────────────────────────────────────
+
+fun progress_callback (duration, progress) {
+}
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+# ── Dialog ─────────────────────────────────────────────────────────────────────
+
+sprite_prompt = SpriteNew();
+status = "normal";
+
+fun dialog_setup() {
+  local.box;
+  local.lock;
+  local.entry;
+  local.prompt_sprite;
+
+  box.image   = ImageNew("box.png");
+  lock.image  = ImageNew("lock.png");
+  entry.image = ImageNew("entry.png");
+
+  box.sprite = SpriteNew();
+  box.sprite.SetImage(box.image);
+  box.x = Window.GetX() + Window.GetWidth()  / 2 - box.image.GetWidth()  / 2;
+  box.y = Window.GetY() + Window.GetHeight() / 2 - box.image.GetHeight() / 2;
+  box.z = 10000;
+  box.sprite.SetPosition(box.x, box.y, box.z);
+
+  lock.sprite = SpriteNew();
+  lock.sprite.SetImage(lock.image);
+  lock.x = box.x + box.image.GetWidth() / 2 - (lock.image.GetWidth() + entry.image.GetWidth()) / 2;
+  lock.y = box.y + box.image.GetHeight() / 2 - lock.image.GetHeight() / 2;
+  lock.z = box.z + 1;
+  lock.sprite.SetPosition(lock.x, lock.y, lock.z);
+
+  entry.sprite = SpriteNew();
+  entry.sprite.SetImage(entry.image);
+  entry.x = lock.x + lock.image.GetWidth();
+  entry.y = box.y + box.image.GetHeight() / 2 - entry.image.GetHeight() / 2;
+  entry.z = box.z + 1;
+  entry.sprite.SetPosition(entry.x, entry.y, entry.z);
+
+  prompt_sprite = SpriteNew();
+  prompt_sprite.SetPosition(box.x, box.y - 20, box.z);
+
+  global.dialog.box           = box;
+  global.dialog.lock          = lock;
+  global.dialog.entry         = entry;
+  global.dialog.bullet_image  = ImageNew("bullet.png");
+  global.dialog.prompt_sprite = prompt_sprite;
+  dialog_opacity(1);
+}
+
+fun dialog_opacity(opacity) {
+  dialog.box.sprite.SetOpacity(opacity);
+  dialog.lock.sprite.SetOpacity(opacity);
+  dialog.entry.sprite.SetOpacity(opacity);
+  dialog.prompt_sprite.SetOpacity(opacity);
+  for (index = 0; dialog.bullet[index]; index++) {
+    dialog.bullet[index].sprite.SetOpacity(opacity);
+  }
+}
+
+fun display_normal_callback () {
+  global.status = "normal";
+  if (global.dialog) {
+    dialog_opacity(0);
+  }
+}
+
+fun display_password_callback (prompt, bullets) {
+  global.status = "password";
+  if (!global.dialog) {
+    dialog_setup();
+  } else {
+    dialog_opacity(1);
+  }
+
+  dialog.prompt_sprite.SetImage(Image.Text(prompt, 1.0, 1.0, 1.0));
+
+  for (index = 0; dialog.bullet[index] || index < bullets; index++) {
+    if (!dialog.bullet[index]) {
+      dialog.bullet[index].sprite = SpriteNew();
+      dialog.bullet[index].sprite.SetImage(dialog.bullet_image);
+      dialog.bullet[index].x = dialog.entry.x + index * dialog.bullet_image.GetWidth();
+      dialog.bullet[index].y = dialog.entry.y + dialog.entry.image.GetHeight() / 2 - dialog.bullet_image.GetHeight() / 2;
+      dialog.bullet[index].z = dialog.entry.z + 1;
+      dialog.bullet[index].sprite.SetPosition(
+        dialog.bullet[index].x,
+        dialog.bullet[index].y,
+        dialog.bullet[index].z
+      );
+    }
+    if (index < bullets) {
+      dialog.bullet[index].sprite.SetOpacity(1);
+    } else {
+      dialog.bullet[index].sprite.SetOpacity(0);
+    }
+  }
+}
+
+fun display_message_callback (prompt) {
+  msg_img = Image.Text(prompt, 1.0, 1.0, 1.0);
+  sprite_prompt.SetImage(msg_img);
+  sprite_prompt.SetPosition(
+    Window.GetX() + (Window.GetWidth() - msg_img.GetWidth()) / 2,
+    Window.GetY() + Window.GetHeight() * 0.93,
+    2
+  );
+}
+
+# Pre-load dialog assets before initrd is unmounted (in case /usr isn't mounted yet)
+dialog_setup();
+dialog_opacity(0);
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetMessageFunction(display_message_callback);
+
+# ── Quit ───────────────────────────────────────────────────────────────────────
+
+fun quit_callback () {
+  if (Plymouth.GetMode() == "shutdown") {
+    logo.sprite.SetOpacity(0);
+    loading_circle.sprite.SetOpacity(0);
+  }
+}
+
+Plymouth.SetQuitFunction(quit_callback);
