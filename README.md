@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="preview.png" alt="Nula Boot Preview" width="100%">
+  <img src="preview.png" alt="Nula Plymouth Theme Preview" width="100%">
   <h1>Nula Plymouth Theme</h1>
   <p>A minimalist Plymouth boot splash theme featuring a sleek loading animation and modern dark aesthetic.</p>
 </div>
@@ -14,7 +14,7 @@
 
 ## Overview
 
-**Nula-Boot** is a modern, minimalist Plymouth theme designed to make your system startup process smooth and visually pleasing. Taking inspiration from clean design principles, it emphasizes clarity and simplicity during the boot process.
+**Nula Plymouth Theme** is a modern, minimalist Plymouth theme designed to make your system startup process smooth and visually pleasing. Taking inspiration from clean design principles, it emphasizes clarity and simplicity during the boot process.
 
 It features multi-resolution support, a sleek dark interface, fluid loading animations, and seamless password prompt integration (e.g., for LUKS/disk encryption).
 
