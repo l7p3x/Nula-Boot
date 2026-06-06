@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="#installation"><img src="https://img.shields.io/badge/Plymouth-Theme-blue.svg" alt="Plymouth Theme"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSD-red.svg" alt="License: BSD"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSD_3--Clause-red.svg" alt="License: BSD 3-Clause"></a>
   <a href="https://github.com/l7p3x/Nula-Plymouth-Theme/stargazers"><img src="https://img.shields.io/github/stars/l7p3x/Nula-Plymouth-Theme.svg" alt="GitHub stars"></a>
 </p>
 
@@ -34,6 +34,7 @@ It features multi-resolution support, a sleek dark interface, fluid loading anim
 ## Installation
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/l7p3x/Nula-Plymouth-Theme.git
 cd Nula-Plymouth-Theme
@@ -50,6 +51,7 @@ sudo cp -r . /usr/share/plymouth/themes/nula-boot
 ### 3. Configure Plymouth
 
 **For Debian/Ubuntu-based systems:**
+
 Install the theme into the alternatives system and configure it as default:
 
 ```bash
@@ -57,7 +59,7 @@ sudo update-alternatives --install /usr/share/plymouth/themes/default.plymouth d
 sudo update-alternatives --config default.plymouth
 ```
 
-*Select `nula-boot` from the list.*
+> Select `nula-boot` from the list when prompted.
 
 Update your initramfs to apply the changes to the boot image:
 
@@ -66,6 +68,7 @@ sudo update-initramfs -u
 ```
 
 **For Arch Linux:**
+
 Edit your `/etc/plymouth/plymouthd.conf` to use the theme:
 
 ```ini
@@ -82,7 +85,7 @@ sudo mkinitcpio -P
 ## Directory Structure
 
 ```text
-Nula-Boot/
+nula-boot/
 ├── gfx/                # Resolution-specific assets (loading circles, logos)
 ├── box.png             # Password prompt asset
 ├── bullet.png          # Password input masked character
@@ -94,7 +97,7 @@ Nula-Boot/
 
 ## Dependencies
 
-* **Plymouth**: The standard Linux boot splash framework.
+- **Plymouth**: The standard Linux boot splash framework.
 
 ## Uninstallation
 
@@ -104,13 +107,27 @@ To remove the theme, delete the theme folder:
 sudo rm -rf /usr/share/plymouth/themes/nula-boot
 ```
 
-Then, change your default theme back to your previous one and rebuild your boot image (using `update-initramfs -u` or `mkinitcpio -P`).
+Then, set your default theme back to a previous one and rebuild your boot image.
+
+**For Debian/Ubuntu-based systems:**
+
+```bash
+sudo update-alternatives --config default.plymouth
+sudo update-initramfs -u
+```
+
+**For Arch Linux:**
+
+```bash
+# Edit /etc/plymouth/plymouthd.conf and set Theme= to your preferred theme
+sudo mkinitcpio -P
+```
 
 ## License
 
-This project is licensed under the BSD License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 3-Clause License — see the [LICENSE](LICENSE) file for details.
 
 ## Credits
 
-* **Developer:** Created by [l7p3x](https://github.com/l7p3x).
-* **Based on:** [Unicyclesynced Ani-10 Dark Gray Plymouth Theme](https://www.gnome-look.org/p/1444644) by **Markospoko**.
+- **Developer:** Created by [l7p3x](https://github.com/l7p3x).
+- **Based on:** [Unicyclesynced Ani-10 Dark Gray Plymouth Theme](https://www.gnome-look.org/p/1444644) by **Markospoko**.
